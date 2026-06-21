@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学业水平考试考务音频播报系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 全局重置 - 去AI味：简洁、正式、政务风 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "SimHei", Arial, sans-serif;
+        }
+        
+        :root {
+            --primary: #165DFF;
+            --secondary: #0E42C7;
+            --success: #00B42A;
+            --danger: #F53F3F;
+            --gray: #F2F3F5;
+            --dark-gray: #86909C;
+            --text: #1D2129;
+            --border: #E5E6EB;
+        }
+        
+        body {
+            background-color: #F7F8FA;
+            color: var(--text);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: #FFFFFF;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        /* 日期时间栏：放大时间字体，更换粗等宽字体 */
+        .datetime-container {
+            background-color: var(--primary);
+            padding: 16px 20px;
+            text-align: center;
+            color: #FFFFFF;
+        }
+        
+        .current-date {
+            font-size: 18px;
+            margin-bottom: 6px;
+            font-weight: normal;
+        }
+        
+        .current-time {
+            font-size: 48px;
+            /* 更换厚重等宽字体，数字更醒目 */
+            font-family: "Consolas", "Source Code Pro", "Courier New", monospace;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+        
+        header {
+            background-color: #FFFFFF;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h1 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 16px;
+        }
+        
+        .panel {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 20px;
+            flex: 1;
+            min-width: 280px;
+            box-shadow: none;
+        }
+        
+        .panel-title {
+            color: var(--text);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .panel-title i {
+            font-size: 18px;
+            color: var(--primary);
+        }
+        
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--primary);
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            flex: 1;
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+            transform: none;
+            box-shadow: none;
+        }
+        
+        button.emergency {
+            background-color: var(--danger);
+        }
+        
+        button.emergency:hover {
+            background-color: #D92D20;
+        }
+        
+        button.success {
+            background-color: var(--success);
+        }
+        
+        button.success:hover {
+            background-color: #00A124;
+        }
+        
+        .timer-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .timer-option {
+            background-color: var(--gray);
+            padding: 12px;
+            border-radius: 4px;
+        }
+        
+        .timer-option h3 {
+            margin-bottom: 8px;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .timer-inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .timer-inputs input, .timer-inputs select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background-color: #FFFFFF;
+            color: var(--text);
+            flex: 1;
+            min-width: 110px;
+            font-size: 14px;
+        }
+        
+        .timer-display {
+            font-size: 20px;
+            text-align: center;
+            margin: 16px 0;
+            padding: 12px;
+            background-color: var(--gray);
+            border-radius: 4px;
+            font-family: "Consolas", monospace;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 12px;
+        }
+        
+        .volume-control input {
+            flex: 1;
+        }
+        
+        .status-indicators {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .indicator {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px;
+            background-color: var(--gray);
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        
+        .indicator.active {
+            background-color: rgba(0, 180, 42, 0.05);
+            border-left: 3px solid var(--success);
+        }
+        
+        .indicator.inactive {
+            background-color: rgba(245, 63, 63, 0.05);
+            border-left: 3px solid var(--danger);
+        }
+        
+        .indicator-title {
+            font-size: 12px;
+            color: var(--dark-gray);
+            margin-bottom: 4px;
+        }
+        
+        .indicator-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .log-container {
+            background-color: var(--gray);
+            border-radius: 4px;
+            padding: 12px;
+            height: 280px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            font-size: 13px;
+        }
+        
+        .log-entry {
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .log-time {
+            color: var(--primary);
+            margin-right: 8px;
+            font-weight: 600;
+        }
+        
+        .scheduled-tasks {
+            margin-top: 16px;
+        }
+        
+        .task-list {
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        
+        .task-item {
+            padding: 8px;
+            background-color: var(--gray);
+            margin-bottom: 8px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+            font-size: 13px;
+        }
+        
+        .task-time {
+            font-weight: 600;
+            color: var(--success);
+        }
+        
+        .task-action {
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 16px;
+            background-color: var(--gray);
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--dark-gray);
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .current-date {
+                font-size: 16px;
+            }
+            .current-time {
+                font-size: 36px;
+            }
+            button {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="datetime-container">
+            <div class="current-date" id="currentDate">2026年06月21日 星期日</div>
+            <div class="current-time" id="currentTime">14:30:45</div>
+        </div>
+        
+        <header>
+            <h1><i class="fas fa-bullhorn"></i> 学业水平考试考务音频播报系统</h1>
+            <div class="subtitle">考试音频播报与时间管理专用控制台</div>
+        </header>
+        
+        <div class="main-content">
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-play-circle"></i> 音频播报控制</h2>
+                
+                <div class="btn-group">
+                    <button id="entranceMusic">
+                        <i class="fas fa-music"></i> 入场音乐
+                    </button>
+                    <button id="entranceInstruction">
+                        <i class="fas fa-door-open"></i> 进入考场指令
+                    </button>
+                    <button id="examRules">
+                        <i class="fas fa-clipboard-list"></i> 考生守则
+                    </button>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="openAnswerSheet">
+                        <i class="fas fa-folder-open"></i> 启封答题卡
+                    </button>
+                    <button id="openExamPaper">
+                        <i class="fas fa-file-alt"></i> 启封试卷袋
+                    </button>
+                    <button id="distributePapers">
+                        <i class="fas fa-copy"></i> 发放试卷
+                    </button>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="examStart" class="success">
+                        <i class="fas fa-hourglass-start"></i> 考试开始
+                    </button>
+                    <button id="countdown15">
+                        <i class="fas fa-clock"></i> 15分钟倒数
+                    </button>
+                    <button id="examEnd" class="emergency">
+                        <i class="fas fa-flag-checkered"></i> 考试结束
+                    </button>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="postExamInstruction">
+                        <i class="fas fa-info-circle"></i> 考后指令
+                    </button>
+                    <button id="stopAudio">
+                        <i class="fas fa-stop"></i> 停止播报
+                    </button>
+                    <button id="saveSettings" class="success">
+                        <i class="fas fa-save"></i> 保存设置
+                    </button>
+                </div>
+                
+                <h2 class="panel-title"><i class="fas fa-volume-up"></i> 音量控制</h2>
+                <div class="volume-control">
+                    <span>播报音量:</span>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="80">
+                    <span id="volumeValue">80%</span>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-clock"></i> 定时播报系统</h2>
+                
+                <div class="timer-controls">
+                    <div class="timer-option">
+                        <h3>北京时间定时播报</h3>
+                        <div class="timer-inputs">
+                            <input type="date" id="beijingDate">
+                            <input type="time" id="beijingTime" value="09:00">
+                            <select id="beijingAudio">
+                                <option value="entranceMusic">入场音乐</option>
+                                <option value="entranceInstruction">进入考场指令</option>
+                                <option value="examRules">考生守则</option>
+                                <option value="openAnswerSheet">启封答题卡</option>
+                                <option value="openExamPaper">启封试卷袋</option>
+                                <option value="distributePapers">发放试卷</option>
+                                <option value="examStart">考试开始</option>
+                                <option value="countdown15">15分钟倒数</option>
+                                <option value="examEnd">考试结束</option>
+                                <option value="postExamInstruction">考后指令</option>
+                            </select>
+                            <button id="setBeijingTimer" class="success">
+                                <i class="fas fa-plus-circle"></i> 添加定时
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="timer-option">
+                        <h3>自定义倒数时间播报</h3>
+                        <div class="timer-inputs">
+                            <input type="number" id="countdownMinutes" min="1" max="120" value="15" placeholder="分钟">
+                            <select id="countdownAudio">
+                                <option value="entranceMusic">入场音乐</option>
+                                <option value="entranceInstruction">进入考场指令</option>
+                                <option value="examRules">考生守则</option>
+                                <option value="openAnswerSheet">启封答题卡</option>
+                                <option value="openExamPaper">启封试卷袋</option>
+                                <option value="distributePapers">发放试卷</option>
+                                <option value="examStart">考试开始</option>
+                                <option value="countdown15">15分钟倒数</option>
+                                <option value="examEnd">考试结束</option>
+                                <option value="postExamInstruction">考后指令</option>
+                            </select>
+                            <button id="setCountdownTimer" class="success">
+                                <i class="fas fa-plus-circle"></i> 添加定时
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="timer-display" id="timerDisplay">
+                    当前无定时任务
+                </div>
+                
+                <div class="scheduled-tasks">
+                    <h3><i class="fas fa-tasks"></i> 已安排的定时任务</h3>
+                    <div class="task-list" id="taskList">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-info-circle"></i> 系统状态</h2>
+                
+                <div class="status-indicators">
+                    <div class="indicator active">
+                        <div class="indicator-title">音频系统</div>
+                        <div class="indicator-value">运行正常</div>
+                    </div>
+                    <div class="indicator active">
+                        <div class="indicator-title">播报状态</div>
+                        <div class="indicator-value">待机中</div>
+                    </div>
+                    <div class="indicator active">
+                        <div class="indicator-title">网络连接</div>
+                        <div class="indicator-value">已连接</div>
+                    </div>
+                    <div class="indicator inactive">
+                        <div class="indicator-title">定时任务</div>
+                        <div class="indicator-value" id="taskCount">0 个</div>
+                    </div>
+                </div>
+                
+                <h2 class="panel-title"><i class="fas fa-history"></i> 操作日志</h2>
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry">
+                        <span class="log-time">14:30:00</span>
+                        <span>系统启动完成，音频播报模块已就绪</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 已完全删除「自定义音频上传文件选择」面板 -->
+        </div>
+        
+        <footer>
+            <p>学业水平考试考务音频播报系统 © 2026 教育考试中心 | 版本 V1.1 | 内置音频资源，无需上传外部文件</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ========== 息屏防中断核心 Wake Lock ==========
+            let wakeLock = null;
+            async function requestWakeLock() {
+                try {
+                    if ('wakeLock' in navigator) {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                        addLog('已获取屏幕唤醒锁，息屏不中断播报');
+                        wakeLock.addEventListener('release', () => {
+                            addLog('唤醒锁释放，播放时会自动重新申请');
+                        });
+                    }
+                } catch (err) {
+                    addLog(`唤醒锁异常: ${err.message}，安卓可手动开启屏幕常亮`);
+                }
+            }
+
+            // WebAudio 全局实例
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            let currentSource = null;
+            let audioBuffers = {};
+
+            // ========== 音频内置配置（取消文件上传，直接嵌入音频地址） ==========
+            // 替换这里为你的内置音频MP3地址，全部内置无需上传文件
+            const embedAudioFiles = {
+                entranceMusic: './audio/entrance_music.mp3',
+                entranceInstruction: './audio/enter_room.mp3',
+                examRules: './audio/rules.mp3',
+                openAnswerSheet: './audio/open_answer.mp3',
+                openExamPaper: './audio/open_paper.mp3',
+                distributePapers: './audio/distribute_paper.mp3',
+                examStart: './audio/exam_start.mp3',
+                countdown15: './audio/remind_15min.mp3',
+                examEnd: './audio/exam_end.mp3',
+                postExamInstruction: './audio/recheck_paper.mp3'
+            };
+
+            // DOM元素
+            const entranceMusicBtn = document.getElementById('entranceMusic');
+            const entranceInstructionBtn = document.getElementById('entranceInstruction');
+            const examRulesBtn = document.getElementById('examRules');
+            const openAnswerSheetBtn = document.getElementById('openAnswerSheet');
+            const openExamPaperBtn = document.getElementById('openExamPaper');
+            const distributePapersBtn = document.getElementById('distributePapers');
+            const examStartBtn = document.getElementById('examStart');
+            const countdown15Btn = document.getElementById('countdown15');
+            const examEndBtn = document.getElementById('examEnd');
+            const postExamInstructionBtn = document.getElementById('postExamInstruction');
+            const stopAudioBtn = document.getElementById('stopAudio');
+            const saveSettingsBtn = document.getElementById('saveSettings');
+            
+            const setBeijingTimerBtn = document.getElementById('setBeijingTimer');
+            const setCountdownTimerBtn = document.getElementById('setCountdownTimer');
+            const beijingDateInput = document.getElementById('beijingDate');
+            const beijingTimeInput = document.getElementById('beijingTime');
+            const beijingAudioSelect = document.getElementById('beijingAudio');
+            const countdownMinutesInput = document.getElementById('countdownMinutes');
+            const countdownAudioSelect = document.getElementById('countdownAudio');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeValue = document.getElementById('volumeValue');
+            const logContainer = document.getElementById('logContainer');
+            const taskList = document.getElementById('taskList');
+            const taskCount = document.getElementById('taskCount');
+            const currentDate = document.getElementById('currentDate');
+            const currentTime = document.getElementById('currentTime');
+
+            // 默认日期填充
+            const today = new Date();
+            beijingDateInput.value = today.toISOString().split('T')[0];
+            
+            // 音频映射
+            let audioFiles = {...embedAudioFiles};
+            const audioDescriptions = {
+                entranceMusic: '入场音乐',
+                entranceInstruction: '进入考场指令',
+                examRules: '考生守则',
+                openAnswerSheet: '启封答题卡',
+                openExamPaper: '启封试卷袋',
+                distributePapers: '发放试卷',
+                examStart: '考试开始',
+                countdown15: '15分钟倒数',
+                examEnd: '考试结束',
+                postExamInstruction: '考后指令'
+            };
+
+            // 预加载内置音频缓存
+            async function preloadAudio(audioType) {
+                if (audioBuffers[audioType]) return;
+                try {
+                    const response = await fetch(audioFiles[audioType]);
+                    const arrayBuffer = await response.arrayBuffer();
+                    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                    audioBuffers[audioType] = audioBuffer;
+                    addLog(`内置音频缓存完成: ${audioDescriptions[audioType]}`);
+                } catch (err) {
+                    addLog(`内置音频加载失败: ${audioDescriptions[audioType]} ${err.message}`);
+                }
+            }
+
+            // 播放音频（息屏持续播放）
+            async function playAudio(audioType) {
+                stopAudio();
+                if (audioContext.state === 'suspended') await audioContext.resume();
+                await requestWakeLock();
+                await preloadAudio(audioType);
+                if (!audioBuffers[audioType]) return;
+
+                currentSource = audioContext.createBufferSource();
+                currentSource.buffer = audioBuffers[audioType];
+                const gainNode = audioContext.createGain();
+                gainNode.gain.value = volumeSlider.value / 100;
+                currentSource.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                currentSource.onended = () => {
+                    addLog(`播报完成：${audioDescriptions[audioType]}`);
+                    currentSource = null;
+                };
+                currentSource.start(0);
+                addLog(`开始播报：${audioDescriptions[audioType]}`);
+            }
+
+            // 停止音频
+            function stopAudio() {
+                if (currentSource) {
+                    try { currentSource.stop(); } catch(e){}
+                    currentSource = null;
+                }
+                addLog('播报已停止');
+            }
+
+            // 本地设置读写（仅保存音量，无自定义音频上传）
+            function loadSettings() {
+                const save = localStorage.getItem('examAudioSettings');
+                if(save){
+                    const s = JSON.parse(save);
+                    if(s.volume){
+                        volumeSlider.value = s.volume;
+                        volumeValue.textContent = s.volume + '%';
+                    }
+                }
+                addLog('系统设置加载完成（内置音频固定）');
+            }
+            function saveSettings() {
+                localStorage.setItem('examAudioSettings', JSON.stringify({volume:volumeSlider.value}));
+                addLog('音量设置已保存');
+            }
+
+            // 实时时间更新
+            function updateDateTime() {
+                const now = new Date();
+                const opt = { year:'numeric', month:'long', day:'numeric', weekday:'long' };
+                currentDate.textContent = now.toLocaleDateString('zh-CN', opt);
+                currentTime.textContent = now.toTimeString().split(' ')[0];
+            }
+
+            // 日志输出
+            function addLog(msg) {
+                const now = new Date();
+                const t = now.toTimeString().split(' ')[0];
+                const item = document.createElement('div');
+                item.className = 'log-entry';
+                item.innerHTML = `<span class="log-time">${t}</span>${msg}`;
+                logContainer.appendChild(item);
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+
+            // 定时任务逻辑
+            let scheduledTasks = [];
+            let taskCheckInterval = null;
+            function addScheduledTask(time, audioType, type) {
+                const task = {id:Date.now(), time, audioType, type, status:'pending'};
+                scheduledTasks.push(task);
+                updateTaskList();
+                addLog(`新增定时播报：${audioDescriptions[audioType]} ${time}`);
+                if(!taskCheckInterval) taskCheckInterval = setInterval(checkScheduledTasks, 1000);
+            }
+            function checkScheduledTasks() {
+                const now = new Date();
+                scheduledTasks.forEach(task=>{
+                    if(task.status==='pending'){
+                        const t = new Date(task.time);
+                        if(now >= t){
+                            playAudio(task.audioType);
+                            task.status = 'completed';
+                            updateTaskList();
+                        }
+                    }
+                });
+                scheduledTasks = scheduledTasks.filter(x=>x.status!=='completed');
+                if(scheduledTasks.length===0 && taskCheckInterval){
+                    clearInterval(taskCheckInterval);
+                    taskCheckInterval=null;
+                }
+            }
+            function updateTaskList() {
+                taskList.innerHTML = '';
+                taskCount.textContent = scheduledTasks.length + ' 个';
+                if(scheduledTasks.length===0){
+                    timerDisplay.textContent = '当前无定时任务';
+                    return;
+                }
+                const next = scheduledTasks.find(x=>x.status==='pending');
+                if(next){
+                    const diff = Math.floor((new Date(next.time) - new Date())/1000);
+                    if(diff>0){
+                        const m = Math.floor(diff/60);
+                        const s = diff%60;
+                        timerDisplay.textContent = `下次播报：${m}分${s}秒后 ${audioDescriptions[next.audioType]}`;
+                    }else{
+                        timerDisplay.textContent = `即将播报：${audioDescriptions[next.audioType]}`;
+                    }
+                }
+                scheduledTasks.forEach(task=>{
+                    const dom = document.createElement('div');
+                    dom.className = 'task-item';
+                    dom.innerHTML = `
+                        <div class="task-info">
+                            <div class="task-time">${task.time}</div>
+                            <div>${audioDescriptions[task.audioType]}</div>
+                        </div>
+                        <div class="task-action" data-id="${task.id}">
+                            ${task.status==='pending'?'<i class="fas fa-times"></i> 取消':'已完成'}
+                        </div>
+                    `;
+                    taskList.appendChild(dom);
+                    const delBtn = dom.querySelector('.task-action');
+                    if(task.status==='pending'){
+                        delBtn.onclick = ()=>{
+                            scheduledTasks = scheduledTasks.filter(x=>x.id!==task.id);
+                            updateTaskList();
+                            addLog(`取消定时：${audioDescriptions[task.audioType]}`);
+                        }
+                    }
+                })
+            }
+
+            // 按钮事件绑定
+            entranceMusicBtn.onclick = ()=>playAudio('entranceMusic');
+            entranceInstructionBtn.onclick = ()=>playAudio('entranceInstruction');
+            examRulesBtn.onclick = ()=>playAudio('examRules');
+            openAnswerSheetBtn.onclick = ()=>playAudio('openAnswerSheet');
+            openExamPaperBtn.onclick = ()=>playAudio('openExamPaper');
+            distributePapersBtn.onclick = ()=>playAudio('distributePapers');
+            examStartBtn.onclick = ()=>playAudio('examStart');
+            countdown15Btn.onclick = ()=>playAudio('countdown15');
+            examEndBtn.onclick = ()=>playAudio('examEnd');
+            postExamInstructionBtn.onclick = ()=>playAudio('postExamInstruction');
+            stopAudioBtn.onclick = stopAudio;
+            saveSettingsBtn.onclick = saveSettings;
+
+            volumeSlider.oninput = ()=>{
+                volumeValue.textContent = volumeSlider.value + '%';
+            }
+
+            setBeijingTimerBtn.onclick = ()=>{
+                const d = beijingDateInput.value;
+                const t = beijingTimeInput.value;
+                const au = beijingAudioSelect.value;
+                if(!d||!t){
+                    addLog('错误：请填写日期时间');
+                    return;
+                }
+                addScheduledTask(`${d}T${t}`, au, 'time');
+            }
+            setCountdownTimerBtn.onclick = ()=>{
+                const m = Number(countdownMinutesInput.value);
+                const au = countdownAudioSelect.value;
+                if(isNaN(m)||m<1){
+                    addLog('错误：请输入有效分钟');
+                    return;
+                }
+                const target = new Date(Date.now() + m*60000);
+                addScheduledTask(target.toISOString(), au, 'count');
+            }
+
+            // 初始化
+            loadSettings();
+            setInterval(updateDateTime, 1000);
+            updateDateTime();
+            addLog('学业水平考试考务音频播报系统启动，内置音频模式');
+
+            window.addEventListener('beforeunload', ()=>{
+                if(wakeLock) wakeLock.release();
+                if(audioContext) audioContext.close();
+            })
+        });
+    </script>
+</body>
+</html>

@@ -1,802 +1,962 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学业水平考试考务音频播报系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 全局重置 - 去AI味：简洁、正式、政务风 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Microsoft YaHei", "SimHei", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "PingFang SC", sans-serif;
         }
-        
+
         :root {
             --primary: #165DFF;
-            --secondary: #0E42C7;
+            --primary-dark: #0E42C7;
             --success: #00B42A;
             --danger: #F53F3F;
-            --gray: #F2F3F5;
-            --dark-gray: #86909C;
+            --warning: #FF7D00;
+            --bg: #F5F7FA;
+            --card: #FFFFFF;
             --text: #1D2129;
+            --text-secondary: #4E5969;
+            --text-tertiary: #86909C;
             --border: #E5E6EB;
+            --radius: 10px;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
         }
-        
+
         body {
-            background-color: #F7F8FA;
+            background-color: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            padding: 10px;
+            padding: 20px;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background-color: #FFFFFF;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            overflow: hidden;
         }
-        
-        /* 日期时间栏：放大时间字体，更换粗等宽字体 */
-        .datetime-container {
-            background-color: var(--primary);
-            padding: 16px 20px;
-            text-align: center;
-            color: #FFFFFF;
-        }
-        
-        .current-date {
-            font-size: 18px;
-            margin-bottom: 6px;
-            font-weight: normal;
-        }
-        
-        .current-time {
-            font-size: 48px;
-            /* 更换厚重等宽字体，数字更醒目 */
-            font-family: "Consolas", "Source Code Pro", "Courier New", monospace;
-            font-weight: bold;
-            letter-spacing: 3px;
-        }
-        
-        header {
-            background-color: #FFFFFF;
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        h1 {
-            font-size: 22px;
-            margin-bottom: 8px;
-            color: var(--primary);
-            font-weight: 600;
-        }
-        
-        .subtitle {
-            font-size: 14px;
-            color: var(--dark-gray);
-        }
-        
-        .main-content {
+
+        /* 顶部标题时间栏 */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 28px 32px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
             display: flex;
+            justify-content: space-between;
+            align-items: center;
             flex-wrap: wrap;
-            padding: 20px;
             gap: 16px;
         }
-        
-        .panel {
-            background-color: #FFFFFF;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 20px;
-            flex: 1;
-            min-width: 280px;
-            box-shadow: none;
-        }
-        
-        .panel-title {
-            color: var(--text);
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border);
-            font-size: 16px;
+
+        .header-title h1 {
+            font-size: 24px;
             font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        .header-time {
+            text-align: right;
+        }
+
+        .time-date {
+            font-size: 15px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .time-clock {
+            font-size: 42px;
+            font-weight: 700;
+            font-family: "Consolas", "Courier New", monospace;
+            letter-spacing: 2px;
+        }
+
+        /* 主内容网格 */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 22px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--text);
         }
-        
-        .panel-title i {
-            font-size: 18px;
+
+        .card-title i {
             color: var(--primary);
+            font-size: 18px;
         }
-        
+
+        /* 按钮组 */
         .btn-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 18px;
         }
-        
-        button {
-            padding: 10px 16px;
+
+        .btn {
+            padding: 11px 12px;
             border: none;
-            border-radius: 4px;
-            background-color: var(--primary);
+            border-radius: 6px;
+            background: var(--primary);
             color: white;
             font-size: 14px;
             cursor: pointer;
-            transition: background-color 0.2s ease;
-            flex: 1;
-            min-width: 140px;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
+            font-weight: 500;
         }
-        
-        button:hover {
-            background-color: var(--secondary);
-            transform: none;
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(22, 93, 255, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-success:hover {
+            background: #009A29;
+            box-shadow: 0 4px 8px rgba(0, 180, 42, 0.2);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #D92D20;
+            box-shadow: 0 4px 8px rgba(245, 63, 63, 0.2);
+        }
+
+        .btn-secondary {
+            background: #F2F3F5;
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #E5E6EB;
             box-shadow: none;
         }
-        
-        button.emergency {
-            background-color: var(--danger);
+
+        .btn.playing {
+            background: var(--warning);
+            box-shadow: 0 0 0 3px rgba(255, 125, 0, 0.15);
         }
-        
-        button.emergency:hover {
-            background-color: #D92D20;
-        }
-        
-        button.success {
-            background-color: var(--success);
-        }
-        
-        button.success:hover {
-            background-color: #00A124;
-        }
-        
-        .timer-controls {
+
+        /* 音量控制 */
+        .volume-wrap {
             display: flex;
-            flex-direction: column;
+            align-items: center;
             gap: 12px;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        .volume-wrap span {
+            font-size: 14px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .volume-wrap input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+        }
+
+        .volume-value {
+            min-width: 40px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* 定时模块 */
+        .timer-section {
+            background: var(--bg);
+            border-radius: 6px;
+            padding: 14px;
             margin-bottom: 16px;
         }
-        
-        .timer-option {
-            background-color: var(--gray);
-            padding: 12px;
-            border-radius: 4px;
-        }
-        
-        .timer-option h3 {
-            margin-bottom: 8px;
-            color: var(--text);
+
+        .timer-section h4 {
             font-size: 14px;
+            margin-bottom: 10px;
+            color: var(--text);
             font-weight: 600;
         }
-        
-        .timer-inputs {
+
+        .timer-input-row {
             display: flex;
-            flex-wrap: wrap;
             gap: 8px;
-            align-items: center;
-        }
-        
-        .timer-inputs input, .timer-inputs select {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-            background-color: #FFFFFF;
-            color: var(--text);
-            flex: 1;
-            min-width: 110px;
-            font-size: 14px;
-        }
-        
-        .timer-display {
-            font-size: 20px;
-            text-align: center;
-            margin: 16px 0;
-            padding: 12px;
-            background-color: var(--gray);
-            border-radius: 4px;
-            font-family: "Consolas", monospace;
-        }
-        
-        .volume-control {
-            display: flex;
-            align-items: center;
-            margin-bottom: 16px;
-            gap: 12px;
-        }
-        
-        .volume-control input {
-            flex: 1;
-        }
-        
-        .status-indicators {
-            display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 24px;
+            margin-bottom: 10px;
         }
-        
-        .indicator {
+
+        .timer-input-row input,
+        .timer-input-row select {
             flex: 1;
-            min-width: 140px;
-            padding: 12px;
-            background-color: var(--gray);
-            border-radius: 4px;
-            text-align: center;
+            min-width: 90px;
+            padding: 8px 10px;
             border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 13px;
+            background: white;
         }
-        
-        .indicator.active {
-            background-color: rgba(0, 180, 42, 0.05);
-            border-left: 3px solid var(--success);
-        }
-        
-        .indicator.inactive {
-            background-color: rgba(245, 63, 63, 0.05);
-            border-left: 3px solid var(--danger);
-        }
-        
-        .indicator-title {
-            font-size: 12px;
-            color: var(--dark-gray);
-            margin-bottom: 4px;
-        }
-        
-        .indicator-value {
-            font-size: 14px;
-            font-weight: 600;
-        }
-        
-        .log-container {
-            background-color: var(--gray);
-            border-radius: 4px;
-            padding: 12px;
-            height: 280px;
-            overflow-y: auto;
-            border: 1px solid var(--border);
+
+        .timer-input-row .btn {
+            flex: 0 0 auto;
+            padding: 8px 14px;
             font-size: 13px;
         }
-        
-        .log-entry {
-            padding: 6px 0;
-            border-bottom: 1px solid var(--border);
+
+        /* 倒计时显示 */
+        .countdown-display {
+            text-align: center;
+            padding: 16px;
+            background: linear-gradient(135deg, #E8F3FF 0%, #D6E8FF 100%);
+            border-radius: 6px;
+            margin-bottom: 16px;
         }
-        
-        .log-time {
-            color: var(--primary);
-            margin-right: 8px;
-            font-weight: 600;
+
+        .countdown-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
         }
-        
-        .scheduled-tasks {
-            margin-top: 16px;
+
+        .countdown-time {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-family: "Consolas", monospace;
         }
-        
+
+        /* 任务列表 */
         .task-list {
-            max-height: 180px;
+            max-height: 200px;
             overflow-y: auto;
+            padding-right: 4px;
         }
-        
+
         .task-item {
-            padding: 8px;
-            background-color: var(--gray);
-            margin-bottom: 8px;
-            border-radius: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid var(--border);
+            padding: 10px 12px;
+            background: var(--bg);
+            border-radius: 5px;
+            margin-bottom: 8px;
             font-size: 13px;
         }
-        
-        .task-time {
+
+        .task-info .task-time {
             font-weight: 600;
             color: var(--success);
+            margin-bottom: 2px;
         }
-        
-        .task-action {
+
+        .task-info .task-name {
+            color: var(--text-secondary);
+        }
+
+        .task-del {
             color: var(--danger);
             cursor: pointer;
             font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
         }
-        
-        footer {
+
+        .task-del:hover {
+            background: rgba(245, 63, 63, 0.1);
+        }
+
+        .empty-tip {
             text-align: center;
-            padding: 16px;
-            background-color: var(--gray);
-            border-top: 1px solid var(--border);
-            font-size: 12px;
-            color: var(--dark-gray);
+            color: var(--text-tertiary);
+            font-size: 13px;
+            padding: 20px 0;
         }
-        
+
+        /* 状态面板 */
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .status-item {
+            padding: 14px;
+            background: var(--bg);
+            border-radius: 6px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .status-item.success {
+            border-left-color: var(--success);
+        }
+
+        .status-item.danger {
+            border-left-color: var(--danger);
+        }
+
+        .status-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-bottom: 4px;
+        }
+
+        .status-value {
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.off {
+            background: var(--danger);
+            animation: none;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* 日志 */
+        .log-box {
+            height: 260px;
+            overflow-y: auto;
+            background: var(--bg);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .log-line {
+            padding: 3px 0;
+            border-bottom: 1px solid #EAECEF;
+        }
+
+        .log-time {
+            color: var(--primary);
+            font-weight: 600;
+            margin-right: 8px;
+            font-family: "Consolas", monospace;
+        }
+
+        /* 底部 */
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-tertiary);
+            font-size: 12px;
+            padding: 12px;
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F2F3F5;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #C9CDD4;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #86909C;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1100px) {
+            .main-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
-            .main-content {
+            body {
+                padding: 12px;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
                 flex-direction: column;
+                text-align: center;
             }
-            .current-date {
-                font-size: 16px;
+
+            .header-time {
+                text-align: center;
+                width: 100%;
             }
-            .current-time {
-                font-size: 36px;
+
+            .time-clock {
+                font-size: 32px;
             }
-            button {
-                min-width: 100%;
+
+            .btn-group {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <div class="datetime-container">
-            <div class="current-date" id="currentDate">2026年06月21日 星期日</div>
-            <div class="current-time" id="currentTime">14:30:45</div>
+        <!-- 顶部头部 -->
+        <div class="header">
+            <div class="header-title">
+                <h1><i class="fas fa-bullhorn"></i> 学业水平考试考务音频播报系统</h1>
+                <p>标准化考场音频指令播报 · 定时自动执行 · 息屏不间断</p>
+            </div>
+            <div class="header-time">
+                <div class="time-date" id="dateText">2026年6月27日 星期六</div>
+                <div class="time-clock" id="timeText">14:30:00</div>
+            </div>
         </div>
-        
-        <header>
-            <h1><i class="fas fa-bullhorn"></i> 学业水平考试考务音频播报系统</h1>
-            <div class="subtitle">考试音频播报与时间管理专用控制台</div>
-        </header>
-        
-        <div class="main-content">
-            <div class="panel">
-                <h2 class="panel-title"><i class="fas fa-play-circle"></i> 音频播报控制</h2>
-                
+
+        <!-- 主体三栏 -->
+        <div class="main-grid">
+            <!-- 第一栏：播报控制 -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-play-circle"></i> 音频播报控制</div>
+
                 <div class="btn-group">
-                    <button id="entranceMusic">
-                        <i class="fas fa-music"></i> 入场音乐
-                    </button>
-                    <button id="entranceInstruction">
-                        <i class="fas fa-door-open"></i> 进入考场指令
-                    </button>
-                    <button id="examRules">
-                        <i class="fas fa-clipboard-list"></i> 考生守则
-                    </button>
+                    <button class="btn" data-audio="entranceMusic"><i class="fas fa-music"></i> 入场音乐</button>
+                    <button class="btn" data-audio="entranceInstruction"><i class="fas fa-door-open"></i> 进入考场</button>
+                    <button class="btn" data-audio="examRules"><i class="fas fa-clipboard-list"></i> 考生守则</button>
                 </div>
-                
+
                 <div class="btn-group">
-                    <button id="openAnswerSheet">
-                        <i class="fas fa-folder-open"></i> 启封答题卡
-                    </button>
-                    <button id="openExamPaper">
-                        <i class="fas fa-file-alt"></i> 启封试卷袋
-                    </button>
-                    <button id="distributePapers">
-                        <i class="fas fa-copy"></i> 发放试卷
-                    </button>
+                    <button class="btn" data-audio="openAnswerSheet"><i class="fas fa-folder-open"></i> 启封答题卡</button>
+                    <button class="btn" data-audio="openExamPaper"><i class="fas fa-file-alt"></i> 启封试卷袋</button>
+                    <button class="btn" data-audio="distributePapers"><i class="fas fa-copy"></i> 发放试卷</button>
                 </div>
-                
+
                 <div class="btn-group">
-                    <button id="examStart" class="success">
-                        <i class="fas fa-hourglass-start"></i> 考试开始
-                    </button>
-                    <button id="countdown15">
-                        <i class="fas fa-clock"></i> 15分钟倒数
-                    </button>
-                    <button id="examEnd" class="emergency">
-                        <i class="fas fa-flag-checkered"></i> 考试结束
-                    </button>
+                    <button class="btn btn-success" data-audio="examStart"><i class="fas fa-hourglass-start"></i>
+                        考试开始</button>
+                    <button class="btn" data-audio="countdown15"><i class="fas fa-clock"></i> 15分钟提醒</button>
+                    <button class="btn btn-danger" data-audio="examEnd"><i class="fas fa-flag-checkered"></i>
+                        考试结束</button>
                 </div>
-                
+
                 <div class="btn-group">
-                    <button id="postExamInstruction">
-                        <i class="fas fa-info-circle"></i> 考后指令
-                    </button>
-                    <button id="stopAudio">
-                        <i class="fas fa-stop"></i> 停止播报
-                    </button>
-                    <button id="saveSettings" class="success">
-                        <i class="fas fa-save"></i> 保存设置
-                    </button>
+                    <button class="btn" data-audio="postExamInstruction"><i class="fas fa-info-circle"></i>
+                        考后指令</button>
+                    <button class="btn btn-secondary" id="stopBtn"><i class="fas fa-stop"></i> 停止播报</button>
+                    <button class="btn btn-secondary" id="saveBtn"><i class="fas fa-save"></i> 保存设置</button>
                 </div>
-                
-                <h2 class="panel-title"><i class="fas fa-volume-up"></i> 音量控制</h2>
-                <div class="volume-control">
-                    <span>播报音量:</span>
+
+                <div class="volume-wrap">
+                    <span><i class="fas fa-volume-up"></i> 播报音量</span>
                     <input type="range" id="volumeSlider" min="0" max="100" value="80">
-                    <span id="volumeValue">80%</span>
+                    <span class="volume-value" id="volumeText">80%</span>
                 </div>
             </div>
-            
-            <div class="panel">
-                <h2 class="panel-title"><i class="fas fa-clock"></i> 定时播报系统</h2>
-                
-                <div class="timer-controls">
-                    <div class="timer-option">
-                        <h3>北京时间定时播报</h3>
-                        <div class="timer-inputs">
-                            <input type="date" id="beijingDate">
-                            <input type="time" id="beijingTime" value="09:00">
-                            <select id="beijingAudio">
-                                <option value="entranceMusic">入场音乐</option>
-                                <option value="entranceInstruction">进入考场指令</option>
-                                <option value="examRules">考生守则</option>
-                                <option value="openAnswerSheet">启封答题卡</option>
-                                <option value="openExamPaper">启封试卷袋</option>
-                                <option value="distributePapers">发放试卷</option>
-                                <option value="examStart">考试开始</option>
-                                <option value="countdown15">15分钟倒数</option>
-                                <option value="examEnd">考试结束</option>
-                                <option value="postExamInstruction">考后指令</option>
-                            </select>
-                            <button id="setBeijingTimer" class="success">
-                                <i class="fas fa-plus-circle"></i> 添加定时
-                            </button>
-                        </div>
+
+            <!-- 第二栏：定时系统 -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-clock"></i> 定时播报系统</div>
+
+                <div class="countdown-display">
+                    <div class="countdown-label">下次播报倒计时</div>
+                    <div class="countdown-time" id="countdownShow">暂无定时任务</div>
+                </div>
+
+                <div class="timer-section">
+                    <h4>北京时间定时</h4>
+                    <div class="timer-input-row">
+                        <input type="date" id="dateInput">
+                        <input type="time" id="timeInput" value="09:00">
                     </div>
-                    
-                    <div class="timer-option">
-                        <h3>自定义倒数时间播报</h3>
-                        <div class="timer-inputs">
-                            <input type="number" id="countdownMinutes" min="1" max="120" value="15" placeholder="分钟">
-                            <select id="countdownAudio">
-                                <option value="entranceMusic">入场音乐</option>
-                                <option value="entranceInstruction">进入考场指令</option>
-                                <option value="examRules">考生守则</option>
-                                <option value="openAnswerSheet">启封答题卡</option>
-                                <option value="openExamPaper">启封试卷袋</option>
-                                <option value="distributePapers">发放试卷</option>
-                                <option value="examStart">考试开始</option>
-                                <option value="countdown15">15分钟倒数</option>
-                                <option value="examEnd">考试结束</option>
-                                <option value="postExamInstruction">考后指令</option>
-                            </select>
-                            <button id="setCountdownTimer" class="success">
-                                <i class="fas fa-plus-circle"></i> 添加定时
-                            </button>
-                        </div>
+                    <div class="timer-input-row">
+                        <select id="audioSelect1">
+                            <option value="entranceMusic">入场音乐</option>
+                            <option value="entranceInstruction">进入考场指令</option>
+                            <option value="examRules">考生守则</option>
+                            <option value="openAnswerSheet">启封答题卡</option>
+                            <option value="openExamPaper">启封试卷袋</option>
+                            <option value="distributePapers">发放试卷</option>
+                            <option value="examStart">考试开始</option>
+                            <option value="countdown15">15分钟提醒</option>
+                            <option value="examEnd">考试结束</option>
+                            <option value="postExamInstruction">考后指令</option>
+                        </select>
+                        <button class="btn btn-success" id="addTimeBtn">添加定时</button>
                     </div>
                 </div>
-                
-                <div class="timer-display" id="timerDisplay">
-                    当前无定时任务
-                </div>
-                
-                <div class="scheduled-tasks">
-                    <h3><i class="fas fa-tasks"></i> 已安排的定时任务</h3>
-                    <div class="task-list" id="taskList">
+
+                <div class="timer-section">
+                    <h4>倒计时定时</h4>
+                    <div class="timer-input-row">
+                        <input type="number" id="minInput" min="1" max="120" value="15" placeholder="分钟">
+                        <select id="audioSelect2">
+                            <option value="entranceMusic">入场音乐</option>
+                            <option value="entranceInstruction">进入考场指令</option>
+                            <option value="examRules">考生守则</option>
+                            <option value="openAnswerSheet">启封答题卡</option>
+                            <option value="openExamPaper">启封试卷袋</option>
+                            <option value="distributePapers">发放试卷</option>
+                            <option value="examStart">考试开始</option>
+                            <option value="countdown15">15分钟提醒</option>
+                            <option value="examEnd">考试结束</option>
+                            <option value="postExamInstruction">考后指令</option>
+                        </select>
+                        <button class="btn btn-success" id="addCountBtn">添加倒计时</button>
                     </div>
+                </div>
+
+                <div class="card-title" style="font-size:15px; margin-top:4px;"><i class="fas fa-tasks"></i> 已安排任务</div>
+                <div class="task-list" id="taskList">
+                    <div class="empty-tip">暂无定时任务</div>
                 </div>
             </div>
-            
-            <div class="panel">
-                <h2 class="panel-title"><i class="fas fa-info-circle"></i> 系统状态</h2>
-                
-                <div class="status-indicators">
-                    <div class="indicator active">
-                        <div class="indicator-title">音频系统</div>
-                        <div class="indicator-value">运行正常</div>
+
+            <!-- 第三栏：状态与日志 -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-info-circle"></i> 系统状态</div>
+
+                <div class="status-grid">
+                    <div class="status-item success">
+                        <div class="status-label">音频引擎</div>
+                        <div class="status-value"><span class="status-dot"></span>运行正常</div>
                     </div>
-                    <div class="indicator active">
-                        <div class="indicator-title">播报状态</div>
-                        <div class="indicator-value">待机中</div>
+                    <div class="status-item" id="playStatusItem">
+                        <div class="status-label">播报状态</div>
+                        <div class="status-value"><span class="status-dot off"></span>待机中</div>
                     </div>
-                    <div class="indicator active">
-                        <div class="indicator-title">网络连接</div>
-                        <div class="indicator-value">已连接</div>
+                    <div class="status-item success">
+                        <div class="status-label">唤醒锁</div>
+                        <div class="status-value" id="wakeStatus"><span class="status-dot off"></span>未激活</div>
                     </div>
-                    <div class="indicator inactive">
-                        <div class="indicator-title">定时任务</div>
-                        <div class="indicator-value" id="taskCount">0 个</div>
+                    <div class="status-item danger">
+                        <div class="status-label">定时任务</div>
+                        <div class="status-value" id="taskCount">0 个</div>
                     </div>
                 </div>
-                
-                <h2 class="panel-title"><i class="fas fa-history"></i> 操作日志</h2>
-                <div class="log-container" id="logContainer">
-                    <div class="log-entry">
-                        <span class="log-time">14:30:00</span>
-                        <span>系统启动完成，音频播报模块已就绪</span>
-                    </div>
+
+                <div class="card-title" style="font-size:15px;"><i class="fas fa-history"></i> 操作日志</div>
+                <div class="log-box" id="logBox">
+                    <div class="log-line"><span class="log-time">--:--:--</span>系统初始化完成</div>
                 </div>
             </div>
-            <!-- 已完全删除「自定义音频上传文件选择」面板 -->
         </div>
-        
-        <footer>
-            <p>学业水平考试考务音频播报系统 © 2026 教育考试中心 | 版本 V1.1 | 内置音频资源，无需上传外部文件</p>
-        </footer>
+
+        <div class="footer">
+            学业水平考试考务音频播报系统 · 内置标准考务指令音频 · 支持息屏后台播报
+        </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // ========== 息屏防中断核心 Wake Lock ==========
-            let wakeLock = null;
-            async function requestWakeLock() {
-                try {
-                    if ('wakeLock' in navigator) {
-                        wakeLock = await navigator.wakeLock.request('screen');
-                        addLog('已获取屏幕唤醒锁，息屏不中断播报');
-                        wakeLock.addEventListener('release', () => {
-                            addLog('唤醒锁释放，播放时会自动重新申请');
-                        });
-                    }
-                } catch (err) {
-                    addLog(`唤醒锁异常: ${err.message}，安卓可手动开启屏幕常亮`);
-                }
+        // ==================== 配置区：替换为你的音频文件名 ====================
+        const audioMap = {
+            entranceMusic: './audio/entrance_music.mp3',
+            entranceInstruction: './audio/enter_room.mp3',
+            examRules: './audio/rules.mp3',
+            openAnswerSheet: './audio/open_answer.mp3',
+            openExamPaper: './audio/open_paper.mp3',
+            distributePapers: './audio/distribute_paper.mp3',
+            examStart: './audio/exam_start.mp3',
+            countdown15: './audio/remind_15min.mp3',
+            examEnd: './audio/exam_end.mp3',
+            postExamInstruction: './audio/recheck_paper.mp3'
+        };
+
+        const audioNameMap = {
+            entranceMusic: '入场音乐',
+            entranceInstruction: '进入考场指令',
+            examRules: '考生守则',
+            openAnswerSheet: '启封答题卡',
+            openExamPaper: '启封试卷袋',
+            distributePapers: '发放试卷',
+            examStart: '考试开始',
+            countdown15: '15分钟提醒',
+            examEnd: '考试结束',
+            postExamInstruction: '考后指令'
+        };
+        // ===================================================================
+
+        // 全局音频实例（原生播放，兼容所有环境）
+        const audioPlayer = new Audio();
+        audioPlayer.preload = 'auto';
+        let currentPlayingKey = null;
+
+        // 唤醒锁
+        let wakeLock = null;
+
+        // 定时任务列表
+        let taskList = [];
+        let timerInterval = null;
+
+        // DOM元素
+        const dateText = document.getElementById('dateText');
+        const timeText = document.getElementById('timeText');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeText = document.getElementById('volumeText');
+        const stopBtn = document.getElementById('stopBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const logBox = document.getElementById('logBox');
+        const taskListDom = document.getElementById('taskList');
+        const taskCountDom = document.getElementById('taskCount');
+        const countdownShow = document.getElementById('countdownShow');
+        const playStatusItem = document.getElementById('playStatusItem');
+        const wakeStatus = document.getElementById('wakeStatus');
+        const dateInput = document.getElementById('dateInput');
+        const timeInput = document.getElementById('timeInput');
+        const audioSelect1 = document.getElementById('audioSelect1');
+        const addTimeBtn = document.getElementById('addTimeBtn');
+        const minInput = document.getElementById('minInput');
+        const audioSelect2 = document.getElementById('audioSelect2');
+        const addCountBtn = document.getElementById('addCountBtn');
+
+        // 初始化
+        function init() {
+            // 设置默认日期
+            const now = new Date();
+            dateInput.value = now.toISOString().split('T')[0];
+
+            // 加载保存的音量
+            const savedVol = localStorage.getItem('exam_audio_volume');
+            if (savedVol) {
+                volumeSlider.value = savedVol;
+                volumeText.textContent = savedVol + '%';
             }
+            audioPlayer.volume = volumeSlider.value / 100;
 
-            // WebAudio 全局实例
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            let currentSource = null;
-            let audioBuffers = {};
-
-            // ========== 音频内置配置（取消文件上传，直接嵌入音频地址） ==========
-            // 替换这里为你的内置音频MP3地址，全部内置无需上传文件
-            const embedAudioFiles = {
-                entranceMusic: './audio/entrance_music.mp3',
-                entranceInstruction: './audio/enter_room.mp3',
-                examRules: './audio/rules.mp3',
-                openAnswerSheet: './audio/open_answer.mp3',
-                openExamPaper: './audio/open_paper.mp3',
-                distributePapers: './audio/distribute_paper.mp3',
-                examStart: './audio/exam_start.mp3',
-                countdown15: './audio/remind_15min.mp3',
-                examEnd: './audio/exam_end.mp3',
-                postExamInstruction: './audio/recheck_paper.mp3'
-            };
-
-            // DOM元素
-            const entranceMusicBtn = document.getElementById('entranceMusic');
-            const entranceInstructionBtn = document.getElementById('entranceInstruction');
-            const examRulesBtn = document.getElementById('examRules');
-            const openAnswerSheetBtn = document.getElementById('openAnswerSheet');
-            const openExamPaperBtn = document.getElementById('openExamPaper');
-            const distributePapersBtn = document.getElementById('distributePapers');
-            const examStartBtn = document.getElementById('examStart');
-            const countdown15Btn = document.getElementById('countdown15');
-            const examEndBtn = document.getElementById('examEnd');
-            const postExamInstructionBtn = document.getElementById('postExamInstruction');
-            const stopAudioBtn = document.getElementById('stopAudio');
-            const saveSettingsBtn = document.getElementById('saveSettings');
-            
-            const setBeijingTimerBtn = document.getElementById('setBeijingTimer');
-            const setCountdownTimerBtn = document.getElementById('setCountdownTimer');
-            const beijingDateInput = document.getElementById('beijingDate');
-            const beijingTimeInput = document.getElementById('beijingTime');
-            const beijingAudioSelect = document.getElementById('beijingAudio');
-            const countdownMinutesInput = document.getElementById('countdownMinutes');
-            const countdownAudioSelect = document.getElementById('countdownAudio');
-            const timerDisplay = document.getElementById('timerDisplay');
-            const volumeSlider = document.getElementById('volumeSlider');
-            const volumeValue = document.getElementById('volumeValue');
-            const logContainer = document.getElementById('logContainer');
-            const taskList = document.getElementById('taskList');
-            const taskCount = document.getElementById('taskCount');
-            const currentDate = document.getElementById('currentDate');
-            const currentTime = document.getElementById('currentTime');
-
-            // 默认日期填充
-            const today = new Date();
-            beijingDateInput.value = today.toISOString().split('T')[0];
-            
-            // 音频映射
-            let audioFiles = {...embedAudioFiles};
-            const audioDescriptions = {
-                entranceMusic: '入场音乐',
-                entranceInstruction: '进入考场指令',
-                examRules: '考生守则',
-                openAnswerSheet: '启封答题卡',
-                openExamPaper: '启封试卷袋',
-                distributePapers: '发放试卷',
-                examStart: '考试开始',
-                countdown15: '15分钟倒数',
-                examEnd: '考试结束',
-                postExamInstruction: '考后指令'
-            };
-
-            // 预加载内置音频缓存
-            async function preloadAudio(audioType) {
-                if (audioBuffers[audioType]) return;
-                try {
-                    const response = await fetch(audioFiles[audioType]);
-                    const arrayBuffer = await response.arrayBuffer();
-                    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                    audioBuffers[audioType] = audioBuffer;
-                    addLog(`内置音频缓存完成: ${audioDescriptions[audioType]}`);
-                } catch (err) {
-                    addLog(`内置音频加载失败: ${audioDescriptions[audioType]} ${err.message}`);
-                }
-            }
-
-            // 播放音频（息屏持续播放）
-            async function playAudio(audioType) {
-                stopAudio();
-                if (audioContext.state === 'suspended') await audioContext.resume();
-                await requestWakeLock();
-                await preloadAudio(audioType);
-                if (!audioBuffers[audioType]) return;
-
-                currentSource = audioContext.createBufferSource();
-                currentSource.buffer = audioBuffers[audioType];
-                const gainNode = audioContext.createGain();
-                gainNode.gain.value = volumeSlider.value / 100;
-                currentSource.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-
-                currentSource.onended = () => {
-                    addLog(`播报完成：${audioDescriptions[audioType]}`);
-                    currentSource = null;
-                };
-                currentSource.start(0);
-                addLog(`开始播报：${audioDescriptions[audioType]}`);
-            }
-
-            // 停止音频
-            function stopAudio() {
-                if (currentSource) {
-                    try { currentSource.stop(); } catch(e){}
-                    currentSource = null;
-                }
-                addLog('播报已停止');
-            }
-
-            // 本地设置读写（仅保存音量，无自定义音频上传）
-            function loadSettings() {
-                const save = localStorage.getItem('examAudioSettings');
-                if(save){
-                    const s = JSON.parse(save);
-                    if(s.volume){
-                        volumeSlider.value = s.volume;
-                        volumeValue.textContent = s.volume + '%';
-                    }
-                }
-                addLog('系统设置加载完成（内置音频固定）');
-            }
-            function saveSettings() {
-                localStorage.setItem('examAudioSettings', JSON.stringify({volume:volumeSlider.value}));
-                addLog('音量设置已保存');
-            }
-
-            // 实时时间更新
-            function updateDateTime() {
-                const now = new Date();
-                const opt = { year:'numeric', month:'long', day:'numeric', weekday:'long' };
-                currentDate.textContent = now.toLocaleDateString('zh-CN', opt);
-                currentTime.textContent = now.toTimeString().split(' ')[0];
-            }
-
-            // 日志输出
-            function addLog(msg) {
-                const now = new Date();
-                const t = now.toTimeString().split(' ')[0];
-                const item = document.createElement('div');
-                item.className = 'log-entry';
-                item.innerHTML = `<span class="log-time">${t}</span>${msg}`;
-                logContainer.appendChild(item);
-                logContainer.scrollTop = logContainer.scrollHeight;
-            }
-
-            // 定时任务逻辑
-            let scheduledTasks = [];
-            let taskCheckInterval = null;
-            function addScheduledTask(time, audioType, type) {
-                const task = {id:Date.now(), time, audioType, type, status:'pending'};
-                scheduledTasks.push(task);
-                updateTaskList();
-                addLog(`新增定时播报：${audioDescriptions[audioType]} ${time}`);
-                if(!taskCheckInterval) taskCheckInterval = setInterval(checkScheduledTasks, 1000);
-            }
-            function checkScheduledTasks() {
-                const now = new Date();
-                scheduledTasks.forEach(task=>{
-                    if(task.status==='pending'){
-                        const t = new Date(task.time);
-                        if(now >= t){
-                            playAudio(task.audioType);
-                            task.status = 'completed';
-                            updateTaskList();
-                        }
-                    }
+            // 绑定按钮事件
+            document.querySelectorAll('[data-audio]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const key = btn.dataset.audio;
+                    playAudio(key);
                 });
-                scheduledTasks = scheduledTasks.filter(x=>x.status!=='completed');
-                if(scheduledTasks.length===0 && taskCheckInterval){
-                    clearInterval(taskCheckInterval);
-                    taskCheckInterval=null;
+            });
+
+            stopBtn.addEventListener('click', stopAudio);
+            saveBtn.addEventListener('click', saveSettings);
+
+            // 音量控制
+            volumeSlider.addEventListener('input', () => {
+                const vol = volumeSlider.value;
+                volumeText.textContent = vol + '%';
+                audioPlayer.volume = vol / 100;
+            });
+
+            // 定时按钮
+            addTimeBtn.addEventListener('click', addTimeTask);
+            addCountBtn.addEventListener('click', addCountdownTask);
+
+            // 音频事件
+            audioPlayer.addEventListener('ended', () => {
+                addLog(`播报完成：${audioNameMap[currentPlayingKey]}`);
+                updatePlayStatus(false);
+                currentPlayingKey = null;
+            });
+
+            audioPlayer.addEventListener('error', () => {
+                addLog(`音频加载失败，请检查文件路径：${audioNameMap[currentPlayingKey]}`);
+                updatePlayStatus(false);
+                currentPlayingKey = null;
+            });
+
+            // 页面可见性变化，恢复播放
+            document.addEventListener('visibilitychange', async () => {
+                if (!document.hidden && currentPlayingKey) {
+                    try { await audioPlayer.play(); } catch (e) { }
+                    await requestWakeLock();
                 }
+            });
+
+            // 启动时钟
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // 启动定时任务检查器
+            startTaskChecker();
+
+            addLog('考务音频播报系统启动成功');
+        }
+
+        // ========== 音频播放核心 ==========
+        function playAudio(key) {
+            if (!audioMap[key]) return;
+
+            // 停止当前播放
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+
+            // 设置新音频
+            currentPlayingKey = key;
+            audioPlayer.src = audioMap[key];
+
+            audioPlayer.play().then(() => {
+                addLog(`开始播报：${audioNameMap[key]}`);
+                updatePlayStatus(true);
+                requestWakeLock();
+                updateBtnActive(key);
+            }).catch(err => {
+                addLog(`播放失败：${err.message}`);
+                updatePlayStatus(false);
+            });
+        }
+
+        function stopAudio() {
+            if (!currentPlayingKey) {
+                addLog('当前无正在播报的音频');
+                return;
             }
-            function updateTaskList() {
-                taskList.innerHTML = '';
-                taskCount.textContent = scheduledTasks.length + ' 个';
-                if(scheduledTasks.length===0){
-                    timerDisplay.textContent = '当前无定时任务';
-                    return;
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            addLog(`已停止播报：${audioNameMap[currentPlayingKey]}`);
+            updatePlayStatus(false);
+            currentPlayingKey = null;
+            updateBtnActive(null);
+        }
+
+        function updateBtnActive(activeKey) {
+            document.querySelectorAll('[data-audio]').forEach(btn => {
+                btn.classList.remove('playing');
+                if (btn.dataset.audio === activeKey) {
+                    btn.classList.add('playing');
                 }
-                const next = scheduledTasks.find(x=>x.status==='pending');
-                if(next){
-                    const diff = Math.floor((new Date(next.time) - new Date())/1000);
-                    if(diff>0){
-                        const m = Math.floor(diff/60);
-                        const s = diff%60;
-                        timerDisplay.textContent = `下次播报：${m}分${s}秒后 ${audioDescriptions[next.audioType]}`;
-                    }else{
-                        timerDisplay.textContent = `即将播报：${audioDescriptions[next.audioType]}`;
+            });
+        }
+
+        function updatePlayStatus(isPlaying) {
+            const dot = playStatusItem.querySelector('.status-dot');
+            const text = playStatusItem.querySelector('.status-value');
+            if (isPlaying) {
+                dot.classList.remove('off');
+                text.innerHTML = '<span class="status-dot"></span>播报中';
+            } else {
+                dot.classList.add('off');
+                text.innerHTML = '<span class="status-dot off"></span>待机中';
+            }
+        }
+
+        // ========== 唤醒锁 ==========
+        async function requestWakeLock() {
+            if (!('wakeLock' in navigator)) return;
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                const dot = wakeStatus.querySelector('.status-dot');
+                dot.classList.remove('off');
+                wakeStatus.querySelector('.status-value').innerHTML = '<span class="status-dot"></span>已激活';
+                addLog('屏幕唤醒锁已获取，息屏不中断');
+
+                wakeLock.addEventListener('release', () => {
+                    const dot = wakeStatus.querySelector('.status-dot');
+                    dot.classList.add('off');
+                    wakeStatus.querySelector('.status-value').innerHTML = '<span class="status-dot off"></span>未激活';
+                });
+            } catch (err) {
+                // 静默失败，不影响播放
+            }
+        }
+
+        // ========== 定时任务 ==========
+        function addTimeTask() {
+            const date = dateInput.value;
+            const time = timeInput.value;
+            const audioKey = audioSelect1.value;
+            if (!date || !time) {
+                addLog('请选择完整的日期和时间');
+                return;
+            }
+            const targetTime = new Date(`${date}T${time}`).getTime();
+            if (targetTime < Date.now()) {
+                addLog('定时时间不能早于当前时间');
+                return;
+            }
+            addTask(targetTime, audioKey, 'fixed');
+            addLog(`已添加定时：${audioNameMap[audioKey]} ${date} ${time}`);
+        }
+
+        function addCountdownTask() {
+            const mins = parseInt(minInput.value);
+            const audioKey = audioSelect2.value;
+            if (isNaN(mins) || mins < 1) {
+                addLog('请输入有效的分钟数');
+                return;
+            }
+            const targetTime = Date.now() + mins * 60 * 1000;
+            addTask(targetTime, audioKey, 'countdown');
+            addLog(`已添加倒计时：${mins}分钟后播放 ${audioNameMap[audioKey]}`);
+        }
+
+        function addTask(time, audioKey, type) {
+            taskList.push({
+                id: Date.now(),
+                time: time,
+                audioKey: audioKey,
+                type: type
+            });
+            taskList.sort((a, b) => a.time - b.time);
+            renderTaskList();
+        }
+
+        function deleteTask(id) {
+            taskList = taskList.filter(t => t.id !== id);
+            renderTaskList();
+            addLog('已删除定时任务');
+        }
+
+        function renderTaskList() {
+            taskCountDom.textContent = `${taskList.length} 个`;
+
+            if (taskList.length === 0) {
+                taskListDom.innerHTML = '<div class="empty-tip">暂无定时任务</div>';
+                countdownShow.textContent = '暂无定时任务';
+                return;
+            }
+
+            let html = '';
+            taskList.forEach(task => {
+                const date = new Date(task.time);
+                const timeStr = date.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                html += `
+                <div class="task-item">
+                    <div class="task-info">
+                        <div class="task-time">${timeStr}</div>
+                        <div class="task-name">${audioNameMap[task.audioKey]}</div>
+                    </div>
+                    <div class="task-del" onclick="deleteTask(${task.id})">删除</div>
+                </div>
+                `;
+            });
+            taskListDom.innerHTML = html;
+        }
+
+        function startTaskChecker() {
+            timerInterval = setInterval(() => {
+                const now = Date.now();
+
+                // 检查到期任务
+                for (let i = taskList.length - 1; i >= 0; i--) {
+                    if (now >= taskList[i].time) {
+                        playAudio(taskList[i].audioKey);
+                        addLog(`定时触发：${audioNameMap[taskList[i].audioKey]}`);
+                        taskList.splice(i, 1);
+                        renderTaskList();
                     }
                 }
-                scheduledTasks.forEach(task=>{
-                    const dom = document.createElement('div');
-                    dom.className = 'task-item';
-                    dom.innerHTML = `
-                        <div class="task-info">
-                            <div class="task-time">${task.time}</div>
-                            <div>${audioDescriptions[task.audioType]}</div>
-                        </div>
-                        <div class="task-action" data-id="${task.id}">
-                            ${task.status==='pending'?'<i class="fas fa-times"></i> 取消':'已完成'}
-                        </div>
-                    `;
-                    taskList.appendChild(dom);
-                    const delBtn = dom.querySelector('.task-action');
-                    if(task.status==='pending'){
-                        delBtn.onclick = ()=>{
-                            scheduledTasks = scheduledTasks.filter(x=>x.id!==task.id);
-                            updateTaskList();
-                            addLog(`取消定时：${audioDescriptions[task.audioType]}`);
-                        }
+
+                // 更新倒计时显示
+                if (taskList.length > 0) {
+                    const next = taskList[0];
+                    const diff = Math.max(0, Math.floor((next.time - now) / 1000));
+                    const h = Math.floor(diff / 3600);
+                    const m = Math.floor((diff % 3600) / 60);
+                    const s = diff % 60;
+
+                    if (h > 0) {
+                        countdownShow.textContent = `${h}时${m.toString().padStart(2, '0')}分${s.toString().padStart(2, '0')}秒`;
+                    } else {
+                        countdownShow.textContent = `${m.toString().padStart(2, '0')}分${s.toString().padStart(2, '0')}秒`;
                     }
-                })
-            }
-
-            // 按钮事件绑定
-            entranceMusicBtn.onclick = ()=>playAudio('entranceMusic');
-            entranceInstructionBtn.onclick = ()=>playAudio('entranceInstruction');
-            examRulesBtn.onclick = ()=>playAudio('examRules');
-            openAnswerSheetBtn.onclick = ()=>playAudio('openAnswerSheet');
-            openExamPaperBtn.onclick = ()=>playAudio('openExamPaper');
-            distributePapersBtn.onclick = ()=>playAudio('distributePapers');
-            examStartBtn.onclick = ()=>playAudio('examStart');
-            countdown15Btn.onclick = ()=>playAudio('countdown15');
-            examEndBtn.onclick = ()=>playAudio('examEnd');
-            postExamInstructionBtn.onclick = ()=>playAudio('postExamInstruction');
-            stopAudioBtn.onclick = stopAudio;
-            saveSettingsBtn.onclick = saveSettings;
-
-            volumeSlider.oninput = ()=>{
-                volumeValue.textContent = volumeSlider.value + '%';
-            }
-
-            setBeijingTimerBtn.onclick = ()=>{
-                const d = beijingDateInput.value;
-                const t = beijingTimeInput.value;
-                const au = beijingAudioSelect.value;
-                if(!d||!t){
-                    addLog('错误：请填写日期时间');
-                    return;
                 }
-                addScheduledTask(`${d}T${t}`, au, 'time');
-            }
-            setCountdownTimerBtn.onclick = ()=>{
-                const m = Number(countdownMinutesInput.value);
-                const au = countdownAudioSelect.value;
-                if(isNaN(m)||m<1){
-                    addLog('错误：请输入有效分钟');
-                    return;
-                }
-                const target = new Date(Date.now() + m*60000);
-                addScheduledTask(target.toISOString(), au, 'count');
-            }
+            }, 1000);
+        }
 
-            // 初始化
-            loadSettings();
-            setInterval(updateDateTime, 1000);
-            updateDateTime();
-            addLog('学业水平考试考务音频播报系统启动，内置音频模式');
+        // ========== 工具函数 ==========
+        function updateClock() {
+            const now = new Date();
+            const opt = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            dateText.textContent = now.toLocaleDateString('zh-CN', opt);
+            timeText.textContent = now.toTimeString().split(' ')[0];
+        }
 
-            window.addEventListener('beforeunload', ()=>{
-                if(wakeLock) wakeLock.release();
-                if(audioContext) audioContext.close();
-            })
-        });
+        function addLog(msg) {
+            const now = new Date();
+            const t = now.toTimeString().split(' ')[0];
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerHTML = `<span class="log-time">${t}</span>${msg}`;
+            logBox.appendChild(line);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function saveSettings() {
+            localStorage.setItem('exam_audio_volume', volumeSlider.value);
+            addLog('音量设置已保存到本地');
+        }
+
+        // 启动
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
+
 </html>
